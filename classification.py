@@ -1,4 +1,3 @@
-
 import pandas as pd
 from sklearn.feature_extraction.text import TfidfVectorizer # https://scikit-learn.org/stable/modules/generated/sklearn.feature_extraction.text.TfidfVectorizer.html
 from sklearn.linear_model import LogisticRegression # https://scikit-learn.org/stable/modules/generated/sklearn.linear_model.LogisticRegression.html 설명
