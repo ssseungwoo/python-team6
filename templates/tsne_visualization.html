@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <title>{{ company }} 뉴스 시각화</title>
+  <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+  <style>
+    body {
+      font-family: 'Apple SD Gothic Neo', 'Segoe UI', sans-serif;
+      background: linear-gradient(to bottom right, #f1f5f9, #e2e8f0);
+      margin: 0;
+      padding: 40px;
+    }
+
+    h1 {
+      text-align: center;
+      font-size: 2.2rem;
+      color: #1e293b;
+      margin-bottom: 2rem;
+      text-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    }
+
+    #chart {
+      width: 100%;
+      height: 85vh;
+      border-radius: 16px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+      background: #fff;
+      padding: 12px;
+    }
+  </style>
+</head>
+<body>
+  <h1>{{ company }} 뉴스 시각화 (t-SNE)</h1>
+  <div id="chart"></div>
+
+  <script>
+    const tsneData = {{ tsne_data_json | tojson }};
+    const highlightId = {{ highlight_id | tojson }};
+
+    const trace = {
+      x: tsneData.map(p => p.x),
+      y: tsneData.map(p => p.y),
+      text: tsneData.map(p =>
+        `📰 <b>${p.title}</b><br>🗂️ 분야: ${p.topic}<br>📊 확률: ${Math.round(p.max_prob * 100)}%`
+      ),
+      mode: 'markers',
+      type: 'scattergl',
+      marker: {
+        color: tsneData.map(p => p.topic_color || '#999'),
+        size: 9,
+        line: { width: 1, color: '#e5e7eb' }
+      },
+      hovertemplate: '%{text}<extra></extra>'
+    };
+
+    const highlightPoint = tsneData.find(p => p.id === highlightId);
+    const highlightTrace = highlightPoint ? [{
+      x: [highlightPoint.x],
+      y: [highlightPoint.y],
+      text: [`📍 <b>${highlightPoint.title}</b><br>🗂️ ${highlightPoint.topic}`],
+      mode: 'markers+text',
+      type: 'scatter',
+      marker: { size: 22, color: '#000', symbol: 'star' },
+      textposition: 'top center',
+      hovertemplate: '%{text}<extra></extra>'
+    }] : [];
+
+    Plotly.newPlot('chart', [trace, ...highlightTrace], {
+      paper_bgcolor: '#ffffff',
+      plot_bgcolor: '#ffffff',
+      font: { color: '#1f2937', family: 'Apple SD Gothic Neo, Segoe UI, sans-serif' },
+      hovermode: 'closest',
+      margin: { t: 40, l: 20, r: 20, b: 20 }
+    });
+  </script>
+</body>
+</html>

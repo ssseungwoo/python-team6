@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <title>{{ company }} 뉴스 목록</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      margin: 40px;
+      background: #f9fafb;
+    }
+
+    h1 {
+      margin-bottom: 24px;
+      color: #111827;
+      font-size: 2rem;
+      font-weight: bold;
+    }
+
+    .news-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 20px;
+    }
+
+    .card {
+      background: white;
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 6px 16px rgba(0,0,0,0.1);
+    }
+
+    .card img {
+      width: 100%;
+      height: auto;
+      max-height: 200px;
+      object-fit: cover;
+    }
+
+    .card-body {
+      padding: 14px;
+    }
+
+    .card-title {
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: #1f2937;
+      text-decoration: none;
+      margin-bottom: 10px;
+      display: block;
+    }
+
+    .meta-info {
+      font-size: 0.85rem;
+      color: #6b7280;
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 6px;
+    }
+
+    .view-count {
+      font-size: 0.85rem;
+      color: #6b7280;
+    }
+
+    .sort-buttons {
+      margin-bottom: 24px;
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .sort-buttons a, .dropdown-toggle {
+      text-decoration: none;
+      padding: 6px 14px;
+      background: #e0e7ff;
+      border-radius: 8px;
+      color: #1e3a8a;
+      font-weight: 500;
+      transition: background 0.2s;
+    }
+
+    .sort-buttons a:hover {
+      background: #c7d2fe;
+    }
+
+    .dev-button {
+      background: #fda4af !important;
+      color: #7f1d1d;
+    }
+
+    .topic-dropdown {
+      position: relative;
+    }
+
+    .topic-list {
+      display: none;
+      position: absolute;
+      top: 36px;
+      left: 0;
+      background: #f1f5f9;
+      border: 1px solid #ccc;
+      padding: 10px;
+      white-space: nowrap;
+      border-radius: 8px;
+      z-index: 10;
+    }
+
+    .topic-dropdown:hover .topic-list {
+      display: block;
+    }
+
+    .topic-list a {
+      display: block;
+      margin-bottom: 6px;
+      text-decoration: none;
+      color: #111827;
+      background: #e2e8f0;
+      padding: 6px 12px;
+      border-radius: 6px;
+      font-size: 0.9em;
+    }
+
+    .hot-keyword-box {
+      display: inline-block;
+      padding: 10px 16px;
+      background-color: #fff7ed;
+      border: 1px solid #fdba74;
+      border-radius: 12px;
+      font-size: 0.95rem;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+      margin-left: auto;
+    }
+
+    .hot-keyword-title {
+      font-weight: 600;
+      color: #ea580c;
+      margin-bottom: 4px;
+    }
+
+    .hot-keyword-rotating {
+  color: #dc2626;
+  font-weight: bold;
+  cursor: pointer;
+  position: relative;
+  display: inline-block;
+}
+
+.hot-keyword-tooltip {
+  display: none;
+  position: absolute;
+  top: 130%;
+  left: 0;
+  background: white;
+  padding: 10px;
+  border-radius: 10px;
+  border: 1px solid #ccc;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+  z-index: 100;
+  white-space: nowrap;
+}
+
+.hot-keyword-rotating:hover .hot-keyword-tooltip {
+  display: block;
+}
+
+
+    .search-box {
+      margin-bottom: 24px;
+    }
+
+    .search-box input {
+      padding: 8px 14px;
+      width: 240px;
+      border: 1px solid #ccc;
+      border-radius: 10px;
+      font-size: 0.95rem;
+    }
+  </style>
+</head>
+<body>
+  <h1>{{ company }} 뉴스 목록</h1>
+
+  {% if wordcloud_url %}
+  <div style="text-align: center; margin: 20px 0;">
+    <img src="{{ wordcloud_url }}" alt="워드클라우드" style="max-width: 100%; height: auto; border: 1px solid #ddd; padding: 10px; background: #fff;" />
+  </div>
+  {% endif %}
+
+  <div class="sort-buttons">
+    <a href="?sort=latest">🕓 최신순</a>
+    <a href="?sort=views">🔥 화제순</a>
+    <div class="topic-dropdown">
+      <div class="dropdown-toggle">📂 주제별 정렬</div>
+      <div class="topic-list">
+        {% for t in topics %}<a href="?sort=topic&filter={{ t }}">{{ t }}</a>{% endfor %}
+      </div>
+    </div>
+    <a href="/news/{{ company }}/visualization" class="dev-button">🧪 개발자도구</a>
+
+    {% if current_topic and hot_keywords[current_topic] is defined %}
+    <div class="hot-keyword-box">
+        <div class="hot-keyword-title">🔥 실시간 키워드</div>
+        <div class="hot-keyword-rotating" data-hot-keywords='{{ hot_keywords[current_topic] | tojson | safe }}'>
+          <span class="current-keyword">1위: {{ hot_keywords[current_topic][0] }}</span>
+          <div class="hot-keyword-tooltip">
+            {% for kw in hot_keywords[current_topic] %}
+              <div>{{ loop.index }}위 : {{ kw }}</div>
+            {% endfor %}
+          </div>
+        </div>
+      </div>
+      
+    {% endif %}
+  </div>
+
+  <div class="search-box">
+    <input type="text" id="searchInput" placeholder="제목 검색...">
+  </div>
+
+  <div class="news-grid" id="newsGrid">
+    {% for article in articles %}
+    <div class="card" data-title="{{ article.title }}">
+      <img src="{{ article.thumbnail_link }}" alt="썸네일" />
+      <div class="card-body">
+        <a href="/news/{{ company }}/article/{{ article.id }}" class="card-title">
+          {{ article.title[:50] }}...
+        </a>
+        <div class="meta-info">
+          <span>🗂️ {{ article.topic }}</span>
+          <span>🕒 {{ article.formatted_date }}</span>
+        </div>
+        {% if article.view_count is defined %}
+        <div class="view-count">👁️ 조회수: {{ article.view_count }}</div>
+        {% endif %}
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+  const el = document.querySelector(".hot-keyword-rotating");
+  if (el) {
+    const keywords = JSON.parse(el.getAttribute("data-hot-keywords"));
+    let idx = 0;
+    const currentEl = el.querySelector(".current-keyword");
+
+    // 초기 표시
+    currentEl.textContent = `1위: ${keywords[0]}`;
+
+    setInterval(() => {
+      currentEl.textContent = `${(idx + 1)}위: ${keywords[idx]}`;
+      idx = (idx + 1) % keywords.length;
+    }, 2000);
+
+    el.addEventListener('click', () => {
+      // 클릭한 키워드에서 순위 제거하고 검색만 사용
+      const rawText = currentEl.textContent;
+      const keywordOnly = rawText.includes(":") ? rawText.split(":")[1].trim() : rawText;
+      document.getElementById("searchInput").value = keywordOnly;
+      filterNews(keywordOnly);
+    });
+  }
+
+  document.getElementById("searchInput").addEventListener("input", e => {
+    filterNews(e.target.value);
+  });
+
+  function filterNews(keyword) {
+    const cards = document.querySelectorAll(".card");
+    cards.forEach(card => {
+      const title = card.getAttribute("data-title").toLowerCase();
+      card.style.display = title.includes(keyword.toLowerCase()) ? "block" : "none";
+    });
+  }
+});
+
+  </script>
+</body>
+</html>

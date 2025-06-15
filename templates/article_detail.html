@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <title>{{ article.title }}</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      margin: 0;
+      padding: 40px;
+      background: #f1f5f9;
+    }
+
+    .main-wrapper {
+      display: flex;
+      flex-direction: column;
+    }
+
+    @media (min-width: 1000px) {
+      .main-wrapper {
+        flex-direction: row;
+        gap: 40px;
+      }
+
+      .recommend {
+        width: 280px;
+      }
+
+      .container {
+        max-width: 800px;
+        flex: 1;
+      }
+    }
+
+    .container {
+      background: #ffffff;
+      padding: 24px;
+      border-radius: 12px;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+      margin-bottom: 40px;
+    }
+
+    .back {
+      margin-bottom: 20px;
+    }
+
+    .back a {
+      text-decoration: none;
+      color: #4f46e5;
+      font-size: 0.95rem;
+    }
+
+    h2 {
+      font-size: 1.5em;
+      color: #111827;
+      margin-bottom: 12px;
+    }
+
+    .topic {
+      font-size: 0.95em;
+      color: #10b981;
+      margin-bottom: 10px;
+      font-weight: 600;
+    }
+
+    .meta {
+      color: #6b7280;
+      font-size: 0.9rem;
+      margin-bottom: 16px;
+    }
+
+    .thumbnail-wrapper {
+      text-align: center;
+      margin: 24px 0;
+    }
+
+    .thumbnail-wrapper img {
+      max-width: 100%;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      cursor: pointer;
+      transition: transform 0.3s ease;
+    }
+
+    .thumbnail-wrapper img:hover {
+      transform: scale(1.02);
+    }
+
+    .summary, .keywords {
+      background: #f9fafb;
+      padding: 16px;
+      border-radius: 10px;
+      border: 1px solid #e5e7eb;
+      margin-bottom: 20px;
+    }
+
+    .section-title {
+      font-weight: 600;
+      margin-bottom: 6px;
+    }
+
+    .youtube-link {
+      margin-top: 16px;
+      font-size: 0.95rem;
+    }
+
+    .youtube-link a {
+      color: #ef4444;
+      text-decoration: none;
+    }
+
+    .recommend h3 {
+      margin-top: 0;
+      font-size: 1.2em;
+      color: #1f2937;
+    }
+
+    .recommend-card {
+      width: 100%;
+      background: white;
+      padding: 10px;
+      border-radius: 8px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+      margin-bottom: 20px;
+      transition: transform 0.25s ease, box-shadow 0.25s ease;
+    }
+
+    .recommend-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    }
+
+    .recommend-card img {
+      width: 100%;
+      max-height: 120px;
+      object-fit: cover;
+      border-radius: 6px;
+      margin-bottom: 8px;
+      transition: transform 0.3s ease;
+    }
+
+    .recommend-card img:hover {
+      transform: scale(1.03);
+    }
+
+    .recommend-card a {
+      text-decoration: none;
+      font-weight: bold;
+      color: #111;
+      display: block;
+      margin-top: 6px;
+    }
+
+    .recommend-card .sub {
+      font-size: 0.85em;
+      color: #666;
+    }
+  </style>
+</head>
+<body>
+  <div class="main-wrapper">
+
+    <div class="container">
+      <div class="back">
+        <a href="/news/{{ company }}">← 목록으로 돌아가기</a>
+      </div>
+
+      <h2>{{ article.title }}</h2>
+      <div class="topic">🗂️ 분야: {{ article.topic }}</div>
+
+      <div class="thumbnail-wrapper">
+        <a href="{{ article.video_link }}" target="_blank">
+          <img src="{{ article.thumbnail_link }}" alt="썸네일" />
+        </a>
+      </div>
+
+      <div class="meta">업로드: {{ article.upload_date_kst }}</div>
+
+      <div class="summary">
+        <div class="section-title">📝 요약:</div>
+        <p>{{ article.summary }}</p>
+      </div>
+
+      <div class="keywords">
+        <div class="section-title">🔍 핵심어:</div>
+        <p>{{ article.keywords | join(', ') }}</p>
+      </div>
+
+      <div class="youtube-link">
+        ▶️ <a href="{{ article.video_link }}" target="_blank">YouTube 바로가기</a>
+      </div>
+      <div class="youtube-link" style="margin-top: 10px;">
+        🧪 <a href="/news/{{ company }}/visualization?highlight={{ article.id }}" target="_blank">
+          개발자 도구로 이 뉴스의 위치 보기
+        </a>
+      </div>
+    </div>
+
+    <div class="recommend">
+      <h3>📰 추천 뉴스</h3>
+      {% for sim in similar_articles %}
+        <div class="recommend-card">
+          <a href="/news/{{ company }}/article/{{ sim.id }}">
+            <img src="{{ sim.thumbnail_link or '' }}" alt="추천 썸네일" />
+            {{ sim.title[:40] }}...
+          </a>
+          <div class="sub">🗂️ {{ sim.topic }}</div> 
+          <div class="sub">🗺️ 이 뉴스와의 거리: 약 {{ sim.distance }}m</div>
+        </div>
+      {% endfor %}
+    </div>
+
+  </div>
+</body>
+</html>
