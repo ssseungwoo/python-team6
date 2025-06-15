@@ -172,3 +172,19 @@ cython_debug/
 
 # PyPI configuration file
 .pypirc
+# 환경 변수 파일 (API 키 등)
+.env
+
+# Python 캐시
+__pycache__/
+*.pyc
+
+# VSCode 설정 (선택)
+.vscode/
+
+# 데이터 파일 (선택적으로 무시할 경우)
+*.csv
+*.json
+
+# Jupyter notebook checkpoints
+.ipynb_checkpoints/
