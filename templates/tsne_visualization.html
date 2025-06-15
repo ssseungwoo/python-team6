@@ -34,6 +34,34 @@
   <h1>{{ company }} 뉴스 시각화 (t-SNE)</h1>
   <div id="chart"></div>
 
+<!-- 기존 chart 아래에 붙이세요 -->
+<div style="margin-top: 2rem; max-width: 600px; margin-left: auto; margin-right: auto; background: #fff; padding: 20px; border-radius: 12px; box-shadow: 0 2px 12px rgba(0,0,0,0.05);">
+  <h2 style="text-align: center; color: #334155;">📊 토픽별 기사 수 및 색상</h2>
+  <table style="width: 100%; border-collapse: collapse; font-size: 1rem;">
+    <thead>
+      <tr style="background-color: #f1f5f9;">
+        <th style="padding: 10px; text-align: left;">토픽</th>
+        <th style="padding: 10px; text-align: center;">기사 수</th>
+        <th style="padding: 10px; text-align: center;">색상</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for topic, count in topic_counts.items() %}
+      <tr>
+        <td style="padding: 10px;">{{ topic }}</td>
+        <td style="padding: 10px; text-align: center;">{{ count }}</td>
+        <td style="padding: 10px; text-align: center;">
+          <span style="display: inline-block; width: 20px; height: 20px; border-radius: 4px; background-color: {{ topic_colors[topic] }}"></span>
+          {{ topic_colors[topic] }}
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+
+
   <script>
     const tsneData = {{ tsne_data_json | tojson }};
     const highlightId = {{ highlight_id | tojson }};
